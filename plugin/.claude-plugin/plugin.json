@@ -1,5 +1,5 @@
 {
-  "name": "bq-din",
+  "name": "bq-ask",
   "version": "1.0.0",
   "description": "Ask BigQuery questions in plain English, as yourself, using your team's shared context.",
   "skills": "./skills/"

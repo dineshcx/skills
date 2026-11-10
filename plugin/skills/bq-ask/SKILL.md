@@ -1,18 +1,18 @@
 ---
-name: bq-din
-description: Answer data questions in plain English from BigQuery, using the bq CLI as the signed-in user and a team-maintained context (datasets, business definitions, gotchas) synced from Cloud Storage or a git repo. Use when someone asks a count, rate, trend, lookup or comparison about their company's data, or wants to set up or change their bq-din context.
+name: bq-ask
+description: Answer data questions in plain English from BigQuery, using the bq CLI as the signed-in user and a team-maintained context (datasets, business definitions, gotchas) synced from Cloud Storage or a git repo. Use when someone asks a count, rate, trend, lookup or comparison about their company's data, or wants to set up or change their bq-ask context.
 argument-hint: "<question>  |  setup"
-allowed-tools: Read, Glob, Grep, Read(~/.cache/bq-din/**), Read(~/.config/bq-din/**), Edit(~/.config/bq-din/**), Bash(gcloud storage rsync:*), Bash(git clone --depth 1:*), Bash(git -C ~/.cache/bq-din/context:*), Bash(bq query:*), Bash(bq ls:*), Bash(bq show:*), Bash(bq version), Bash(gcloud auth list:*)
+allowed-tools: Read, Glob, Grep, Read(~/.cache/bq-ask/**), Read(~/.config/bq-ask/**), Edit(~/.config/bq-ask/**), Bash(gcloud storage rsync:*), Bash(git clone --depth 1:*), Bash(git -C ~/.cache/bq-ask/context:*), Bash(bq query:*), Bash(bq ls:*), Bash(bq show:*), Bash(bq version), Bash(gcloud auth list:*)
 ---
 
-# bq-din
+# bq-ask
 
 Answer the question in the arguments. The person asking may not be technical: they can't check SQL, but they can check a sentence.
 
 Paths:
-- `CONFIG` = `~/.config/bq-din/context-url`: one line, the context link.
-- `CACHE` = `~/.cache/bq-din/context`: the local copy of the context.
-- `CONTEXT` = the folder inside `CACHE` that contains `bq-din.md` (usually `CACHE` itself; otherwise find it with Glob `CACHE/**/bq-din.md`).
+- `CONFIG` = `~/.config/bq-ask/context-url`: one line, the context link.
+- `CACHE` = `~/.cache/bq-ask/context`: the local copy of the context.
+- `CONTEXT` = the folder inside `CACHE` that contains `bq-ask.md` (usually `CACHE` itself; otherwise find it with Glob `CACHE/**/bq-ask.md`).
 
 If `CONFIG` doesn't exist, or the arguments are `setup` or ask to change the context, run **Setup**. Otherwise go to **Answer**.
 
@@ -25,12 +25,12 @@ If `CONFIG` doesn't exist, or the arguments are `setup` or ask to change the con
    - Cloud Storage: `gs://<bucket>/<path>`
    - git repo: `https://github.com/<org>/<repo>(.git)` or `git@github.com:<org>/<repo>.git` (any git host works)
 3. **Sync it** (see *Sync*, below).
-   - If `CONFIG` already holds a *different* link, the old copy in `CACHE` must go first: ask, then delete it (`rm -rf ~/.cache/bq-din/context`).
+   - If `CONFIG` already holds a *different* link, the old copy in `CACHE` must go first: ask, then delete it (`rm -rf ~/.cache/bq-ask/context`).
    - Otherwise sync over whatever is in `CACHE`. If `git clone` fails because `CACHE` isn't empty, delete it the same way and clone again.
    - If the sync fails, explain using *Sync failures*, and stop.
-   - If there's no `bq-din.md` in what you downloaded, it's not a bq-din context: say so and stop.
+   - If there's no `bq-ask.md` in what you downloaded, it's not a bq-ask context: say so and stop.
 4. **Save** the link to `CONFIG` with the Write tool.
-5. **Confirm access.** Read `CONTEXT/bq-din.md` and run `bq query --project_id=<billing_project> --use_legacy_sql=false --format=json 'SELECT SESSION_USER() AS me'`. If it fails, explain the error (most often a missing BigQuery Job User role on the billing project).
+5. **Confirm access.** Read `CONTEXT/bq-ask.md` and run `bq query --project_id=<billing_project> --use_legacy_sql=false --format=json 'SELECT SESSION_USER() AS me'`. If it fails, explain the error (most often a missing BigQuery Job User role on the billing project).
 6. Tell them it's ready, as which Google account, and show 2–3 example questions from the context if it has any. If their arguments already contained a question, answer it now.
 
 ## Sync
@@ -39,12 +39,12 @@ Once per conversation, before the first query, refresh `CACHE` from the link in 
 
 - `gs://...`:
   ```sh
-  gcloud storage rsync <link> ~/.cache/bq-din/context --recursive --delete-unmatched-destination-objects
+  gcloud storage rsync <link> ~/.cache/bq-ask/context --recursive --delete-unmatched-destination-objects
   ```
-- git, first time (no `CACHE/.git`): `git clone --depth 1 <link> ~/.cache/bq-din/context`
-- git, after that: `git -C ~/.cache/bq-din/context pull --ff-only`. If that fails for any reason other than the network (history was rewritten, for instance), ask before deleting `CACHE`, then clone again.
+- git, first time (no `CACHE/.git`): `git clone --depth 1 <link> ~/.cache/bq-ask/context`
+- git, after that: `git -C ~/.cache/bq-ask/context pull --ff-only`. If that fails for any reason other than the network (history was rewritten, for instance), ask before deleting `CACHE`, then clone again.
 
-The context's version: `CONTEXT/VERSION` if present, else `git -C ~/.cache/bq-din/context log -1 --format='%h %cs'`.
+The context's version: `CONTEXT/VERSION` if present, else `git -C ~/.cache/bq-ask/context log -1 --format='%h %cs'`.
 
 **Sync failures:**
 - If a copy is already in `CACHE`, carry on with it, and say in your answer that the context may be out of date, giving its version.
@@ -54,7 +54,7 @@ The context's version: `CONTEXT/VERSION` if present, else `git -C ~/.cache/bq-di
 
 ## Answer
 
-1. **Sync** (above), then read `CONTEXT/bq-din.md`. It's the entry point. Its frontmatter gives:
+1. **Sync** (above), then read `CONTEXT/bq-ask.md`. It's the entry point. Its frontmatter gives:
    - `billing_project` (required): the project queries run and bill in.
    - `max_bytes_billed` (optional, default `5000000000`, which is 5 GB): the per-query cap.
 

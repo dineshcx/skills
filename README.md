@@ -1,12 +1,12 @@
 <img src="assets/icon.svg" width="64" height="64" alt="">
 
-# bq-din
+# bq-ask
 
 Ask BigQuery questions in plain English from **Claude Code** or **Codex CLI**:
 
 ```
-/bq-din how many orders were refunded last week?      # Claude Code
-$bq-din how many orders were refunded last week?      # Codex
+/bq-ask how many orders were refunded last week?      # Claude Code
+$bq-ask how many orders were refunded last week?      # Codex
 ```
 
 The agent runs the `bq` CLI **as you**, so it only sees what your Google account can see. It learns what your data means (which dataset, what "active customer" means, which rows to exclude) from a **context**: a folder of Markdown files your team keeps in a Cloud Storage bucket or a git repo. The skill holds no company information; each team brings its own context.
@@ -21,30 +21,30 @@ The agent runs the `bq` CLI **as you**, so it only sees what your Google account
    - **Claude Code:**
      ```
      /plugin marketplace add dineshcx/bq-ask
-     /plugin install bq-din@bq-din
+     /plugin install bq-ask@bq-ask
      ```
    - **Codex:**
      ```sh
      codex plugin marketplace add dineshcx/bq-ask
-     codex plugin add bq-din@bq-din
+     codex plugin add bq-ask@bq-ask
      ```
-3. Run `/bq-din setup` (or `$bq-din setup` in Codex). It asks for one thing, your team's **context link**:
+3. Run `/bq-ask setup` (or `$bq-ask setup` in Codex). It asks for one thing, your team's **context link**:
    - a bucket path, `gs://<bucket>/<path>`, or
    - a git repo, `https://github.com/<org>/<repo>` or `git@github.com:<org>/<repo>.git`.
 
-   It saves the link to `~/.config/bq-din/context-url` and checks that you can read the context and run queries. To switch contexts later, run `/bq-din setup` again.
+   It saves the link to `~/.config/bq-ask/context-url` and checks that you can read the context and run queries. To switch contexts later, run `/bq-ask setup` again.
 
 **Codex sandbox:** network access is blocked by default, so each `gcloud`, `git` or `bq` call needs approval. To skip the prompts, add these lines to `~/.codex/rules/default.rules`:
 
 ```
 prefix_rule(pattern=["gcloud", "storage", "rsync"], decision="allow")
-prefix_rule(pattern=["git", "-C", "~/.cache/bq-din/context"], decision="allow")
+prefix_rule(pattern=["git", "-C", "~/.cache/bq-ask/context"], decision="allow")
 prefix_rule(pattern=["bq", "query"], decision="allow")
 prefix_rule(pattern=["bq", "ls"], decision="allow")
 prefix_rule(pattern=["bq", "show"], decision="allow")
 ```
 
-**Updates:** context updates reach you automatically, because the skill syncs the context at the start of every conversation. Plugin updates are rare: run `/plugin marketplace update bq-din` (Claude Code) or `codex plugin marketplace upgrade` (Codex).
+**Updates:** context updates reach you automatically, because the skill syncs the context at the start of every conversation. Plugin updates are rare: run `/plugin marketplace update bq-ask` (Claude Code) or `codex plugin marketplace upgrade` (Codex).
 
 ## What the skill guarantees
 
@@ -59,9 +59,9 @@ These hold whatever the context says:
 
 ## Creating a context (for data teams)
 
-A context is a folder of Markdown files. The only required file is `bq-din.md`. Everything else is up to you, as long as `bq-din.md` points to it.
+A context is a folder of Markdown files. The only required file is `bq-ask.md`. Everything else is up to you, as long as `bq-ask.md` points to it.
 
-### `bq-din.md`: the entry point
+### `bq-ask.md`: the entry point
 
 ```markdown
 ---
@@ -84,7 +84,7 @@ The body is instructions for the agent, so say how to find the right dataset and
 ### Recommended layout
 
 ```
-bq-din.md                     entry point (above)
+bq-ask.md                     entry point (above)
 datasets.md                   registry: what people call it → app → `project.dataset`, location, timezone
 cross-dataset.md              optional: how to combine datasets (UNION ALL across clients, join keys across apps)
 apps/<app>/
@@ -118,7 +118,7 @@ echo "$(git rev-parse --short HEAD) $(date -u +%FT%RZ)" | gcloud storage cp - gs
 
 Give users `roles/storage.objectViewer` on the bucket, or on a managed folder for that path. The `VERSION` file is optional; if present, the agent quotes it when the context might be stale.
 
-**git repo:** push to the default branch. Users need read access to the repo through their usual git credentials. The context can live in a subfolder, because the skill finds `bq-din.md` anywhere in the repo.
+**git repo:** push to the default branch. Users need read access to the repo through their usual git credentials. The context can live in a subfolder, because the skill finds `bq-ask.md` anywhere in the repo.
 
 Use a bucket when your users have Google accounts but not access to your git host: one `gcloud auth login` then covers both the context and BigQuery.
 

@@ -1,7 +1,7 @@
 {
-  "name": "bq-din",
-  "owner": { "name": "bq-din" },
+  "name": "bq-ask",
+  "owner": { "name": "bq-ask" },
   "plugins": [
-    { "name": "bq-din", "source": "./plugin", "description": "Ask BigQuery questions in plain English, as yourself, using your team's shared context." }
+    { "name": "bq-ask", "source": "./plugin", "description": "Ask BigQuery questions in plain English, as yourself, using your team's shared context." }
   ]
 }
