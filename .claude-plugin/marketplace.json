@@ -2,6 +2,6 @@
   "name": "dineshcx",
   "owner": { "name": "dineshcx" },
   "plugins": [
-    { "name": "bq-ask", "source": "./plugin", "description": "Ask BigQuery questions in plain English, as yourself, using your team's shared context." }
+    { "name": "dineshcx", "source": "./plugin", "description": "dineshcx's skills for Claude Code and Codex. bq-ask: ask BigQuery questions in plain English." }
   ]
 }
