@@ -1,6 +1,6 @@
 {
-  "name": "bq-ask",
-  "owner": { "name": "bq-ask" },
+  "name": "dineshcx",
+  "owner": { "name": "dineshcx" },
   "plugins": [
     { "name": "bq-ask", "source": "./plugin", "description": "Ask BigQuery questions in plain English, as yourself, using your team's shared context." }
   ]

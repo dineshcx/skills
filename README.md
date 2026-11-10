@@ -8,7 +8,7 @@ Ask BigQuery questions in plain English from **Claude Code** or **Codex CLI**:
 /bq-ask how many orders were refunded last week?      # Claude Code
 $bq-ask how many orders were refunded last week?      # Codex
 ```
-
+ff
 The agent runs the `bq` CLI **as you**, so it only sees what your Google account can see. It learns what your data means (which dataset, what "active customer" means, which rows to exclude) from a **context**: a folder of Markdown files your team keeps in a Cloud Storage bucket or a git repo. The skill holds no company information; each team brings its own context.
 
 ## Install
@@ -21,12 +21,12 @@ The agent runs the `bq` CLI **as you**, so it only sees what your Google account
    - **Claude Code:**
      ```
      /plugin marketplace add dineshcx/bq-ask
-     /plugin install bq-ask@bq-ask
+     /plugin install bq-ask@dineshcx
      ```
    - **Codex:**
      ```sh
      codex plugin marketplace add dineshcx/bq-ask
-     codex plugin add bq-ask@bq-ask
+     codex plugin add bq-ask@dineshcx
      ```
 3. Run `/bq-ask setup` (or `$bq-ask setup` in Codex). It asks for one thing, your team's **context link**:
    - a bucket path, `gs://<bucket>/<path>`, or
@@ -44,7 +44,7 @@ prefix_rule(pattern=["bq", "ls"], decision="allow")
 prefix_rule(pattern=["bq", "show"], decision="allow")
 ```
 
-**Updates:** context updates reach you automatically, because the skill syncs the context at the start of every conversation. Plugin updates are rare: run `/plugin marketplace update bq-ask` (Claude Code) or `codex plugin marketplace upgrade` (Codex).
+**Updates:** context updates reach you automatically, because the skill syncs the context at the start of every conversation. Plugin updates are rare: run `/plugin marketplace update dineshcx` (Claude Code) or `codex plugin marketplace upgrade` (Codex).
 
 ## What the skill guarantees
 
