@@ -1,8 +1,8 @@
 ---
 name: bq-ask
-description: Answer data questions in plain English from BigQuery, using the bq CLI as the signed-in user and a team-maintained context (datasets, business definitions, gotchas) synced from Cloud Storage or a git repo. Use when someone asks a count, rate, trend, lookup or comparison about their company's data, or wants to set up or change their bq-ask context.
-argument-hint: "<question>  |  setup"
-allowed-tools: Read, Glob, Grep, Read(~/.cache/bq-ask/**), Read(~/.config/bq-ask/**), Edit(~/.config/bq-ask/**), Bash(gcloud storage rsync:*), Bash(git clone --depth 1:*), Bash(git -C ~/.cache/bq-ask/context:*), Bash(bq query:*), Bash(bq ls:*), Bash(bq show:*), Bash(bq version), Bash(gcloud auth list:*)
+description: Answer data questions in plain English from BigQuery, using the bq CLI as the signed-in user and a team-maintained context (datasets, business definitions, filters, gotchas) synced from Cloud Storage or a git repo. Use when someone asks for a count, rate, trend, lookup or comparison over their company's data, or asks "how many", "what's the", "which clients" about data their team has a bq-ask context for.
+argument-hint: "<question>"
+allowed-tools: Read, Glob, Grep, Read(~/.cache/bq-ask/**), Read(~/.config/bq-ask/**), Bash(gcloud storage rsync:*), Bash(git -C ~/.cache/bq-ask/context:*), Bash(bq query:*), Bash(bq ls:*), Bash(bq show:*)
 ---
 
 # bq-ask
@@ -10,28 +10,11 @@ allowed-tools: Read, Glob, Grep, Read(~/.cache/bq-ask/**), Read(~/.config/bq-ask
 Answer the question in the arguments. The person asking may not be technical: they can't check SQL, but they can check a sentence.
 
 Paths:
-- `CONFIG` = `~/.config/bq-ask/context-url`: one line, the context link.
+- `CONFIG` = `~/.config/bq-ask/context-url`: one line, the context link. It should have been written by `/setup-bq-ask`. If it doesn't exist, tell the user to run `/setup-bq-ask` (`$setup-bq-ask` in Codex) and stop.
 - `CACHE` = `~/.cache/bq-ask/context`: the local copy of the context.
 - `CONTEXT` = the folder inside `CACHE` that contains `bq-ask.md` (usually `CACHE` itself; otherwise find it with Glob `CACHE/**/bq-ask.md`).
 
-If `CONFIG` doesn't exist, or the arguments are `setup` or ask to change the context, run **Setup**. Otherwise go to **Answer**.
-
-## Setup
-
-1. **Check the tools.** Run `bq version` and `gcloud auth list`.
-   - `bq` not found: they need the Google Cloud SDK (`brew install --cask google-cloud-sdk` on macOS, or https://cloud.google.com/sdk/docs/install).
-   - No active account: they need to run `gcloud auth login` with their work Google account. Stop until they have.
-2. **Ask for one thing: the context link** their data team gave them, unless the arguments already include it. It's one of:
-   - Cloud Storage: `gs://<bucket>/<path>`
-   - git repo: `https://github.com/<org>/<repo>(.git)` or `git@github.com:<org>/<repo>.git` (any git host works)
-3. **Sync it** (see *Sync*, below).
-   - If `CONFIG` already holds a *different* link, the old copy in `CACHE` must go first: ask, then delete it (`rm -rf ~/.cache/bq-ask/context`).
-   - Otherwise sync over whatever is in `CACHE`. If `git clone` fails because `CACHE` isn't empty, delete it the same way and clone again.
-   - If the sync fails, explain using *Sync failures*, and stop.
-   - If there's no `bq-ask.md` in what you downloaded, it's not a bq-ask context: say so and stop.
-4. **Save** the link to `CONFIG` with the Write tool.
-5. **Confirm access.** Read `CONTEXT/bq-ask.md` and run `bq query --project_id=<billing_project> --use_legacy_sql=false --format=json 'SELECT SESSION_USER() AS me'`. If it fails, explain the error (most often a missing BigQuery Job User role on the billing project).
-6. Tell them it's ready, as which Google account, and show 2–3 example questions from the context if it has any. If their arguments already contained a question, answer it now.
+The context format is described in [CONTEXT-FORMAT.md](CONTEXT-FORMAT.md). Read it only if the context looks broken or someone asks how to write one.
 
 ## Sync
 
@@ -41,16 +24,15 @@ Once per conversation, before the first query, refresh `CACHE` from the link in 
   ```sh
   gcloud storage rsync <link> ~/.cache/bq-ask/context --recursive --delete-unmatched-destination-objects
   ```
-- git, first time (no `CACHE/.git`): `git clone --depth 1 <link> ~/.cache/bq-ask/context`
-- git, after that: `git -C ~/.cache/bq-ask/context pull --ff-only`. If that fails for any reason other than the network (history was rewritten, for instance), ask before deleting `CACHE`, then clone again.
+- git: `git -C ~/.cache/bq-ask/context pull --ff-only`. If that fails for any reason other than the network (history was rewritten, for instance), tell the user to run `/setup-bq-ask` again.
 
 The context's version: `CONTEXT/VERSION` if present, else `git -C ~/.cache/bq-ask/context log -1 --format='%h %cs'`.
 
-**Sync failures:**
+**If the sync fails:**
 - If a copy is already in `CACHE`, carry on with it, and say in your answer that the context may be out of date, giving its version.
 - If there's no copy, stop and explain:
   - an auth error: they need `gcloud auth login` (for a bucket) or git credentials for that host (for a repo);
-  - `403`, `AccessDenied`, `not found` or `Repository not found`: their account can't read it, or the link is wrong. They should check the link with whoever gave it to them.
+  - `403`, `AccessDenied`, `not found` or `Repository not found`: their account can't read the context, or the link is wrong. They should check it with whoever gave it to them, then run `/setup-bq-ask`.
 
 ## Answer
 

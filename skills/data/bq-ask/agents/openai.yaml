@@ -1,0 +1,3 @@
+interface:
+  display_name: "BQ Ask"
+  short_description: "Ask BigQuery questions in plain English"

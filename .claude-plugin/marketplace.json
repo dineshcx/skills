@@ -1,7 +1,17 @@
 {
   "name": "dineshcx",
-  "owner": { "name": "dineshcx" },
+  "owner": {
+    "name": "dineshcx",
+    "url": "https://github.com/dineshcx"
+  },
+  "description": "dineshcx's agent skills, as an installable plugin for Claude Code and Codex.",
   "plugins": [
-    { "name": "dineshcx", "source": "./plugin", "description": "dineshcx's skills for Claude Code and Codex. bq-ask: ask BigQuery questions in plain English." }
+    {
+      "name": "dineshcx-skills",
+      "source": "./",
+      "description": "dineshcx's agent skills. Data: ask BigQuery questions in plain English, as yourself, from your team's shared context.",
+      "category": "data",
+      "keywords": ["skills", "bigquery", "data", "analytics"]
+    }
   ]
 }

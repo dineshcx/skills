@@ -1,0 +1,16 @@
+{
+  "name": "dineshcx-skills",
+  "version": "1.0.0",
+  "description": "dineshcx's agent skills for Claude Code and Codex. Data: ask BigQuery questions in plain English, as yourself, from your team's shared context.",
+  "author": {
+    "name": "dineshcx",
+    "url": "https://github.com/dineshcx"
+  },
+  "repository": "https://github.com/dineshcx/skills",
+  "license": "MIT",
+  "keywords": ["skills", "bigquery", "data", "analytics"],
+  "skills": [
+    "./skills/data/bq-ask",
+    "./skills/data/setup-bq-ask"
+  ]
+}

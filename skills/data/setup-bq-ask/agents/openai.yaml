@@ -1,0 +1,5 @@
+interface:
+  display_name: "Set up BQ Ask"
+  short_description: "Connect bq-ask to your team's data context"
+policy:
+  allow_implicit_invocation: false

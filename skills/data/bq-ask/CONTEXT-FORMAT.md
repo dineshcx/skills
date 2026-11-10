@@ -1,55 +1,10 @@
-# bq-ask
+# Context format
 
-Ask BigQuery questions in plain English from **Claude Code** or **Codex CLI**:
+A bq-ask **context** is a folder of Markdown files that tells the agent what a team's data means: which dataset to use, how each metric is defined, which rows to exclude. It lives in a Cloud Storage bucket or a git repo; `/setup-bq-ask` connects a user to it, and `bq-ask` syncs it at the start of every conversation.
 
-```
-/dineshcx:bq-ask how many orders were refunded last week?     # Claude Code (plain /bq-ask works too)
-$dineshcx:bq-ask how many orders were refunded last week?     # Codex
-```
+The only required file is `bq-ask.md`. Everything else is up to you, as long as `bq-ask.md` points to it.
 
-The agent runs the `bq` CLI **as you**, so it only sees what your Google account can see. It learns what your data means (which dataset, what "active customer" means, which rows to exclude) from a **context**: a folder of Markdown files your team keeps in a Cloud Storage bucket or a git repo. The skill holds no company information; each team brings its own context.
-
-## Install
-
-1. Install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) (`brew install --cask google-cloud-sdk` on macOS) and sign in:
-   ```sh
-   gcloud auth login
-   ```
-2. Install the `dineshcx` plugin ([install steps](../README.md#install)).
-3. Run `/dineshcx:bq-ask setup` (or `$dineshcx:bq-ask setup` in Codex). It asks for one thing, your team's **context link**:
-   - a bucket path, `gs://<bucket>/<path>`, or
-   - a git repo, `https://github.com/<org>/<repo>` or `git@github.com:<org>/<repo>.git`.
-
-   It saves the link to `~/.config/bq-ask/context-url` and checks that you can read the context and run queries. To switch contexts later, run setup again.
-
-**Codex sandbox:** network access is blocked by default, so each `gcloud`, `git` or `bq` call needs approval. To skip the prompts, add these lines to `~/.codex/rules/default.rules`:
-
-```
-prefix_rule(pattern=["gcloud", "storage", "rsync"], decision="allow")
-prefix_rule(pattern=["git", "-C", "~/.cache/bq-ask/context"], decision="allow")
-prefix_rule(pattern=["bq", "query"], decision="allow")
-prefix_rule(pattern=["bq", "ls"], decision="allow")
-prefix_rule(pattern=["bq", "show"], decision="allow")
-```
-
-**Updates:** context updates reach you automatically, because the skill syncs the context at the start of every conversation. For plugin updates, see the [README](../README.md#updates).
-
-## What the skill guarantees
-
-These hold whatever the context says:
-
-- **Read-only.** It runs only `SELECT` queries, plus `bq ls` and `bq show`.
-- **No surprise cost.** Every query has a `--maximum_bytes_billed` cap, and the skill asks before raising it.
-- **Honest answers.** It never invents a business definition. When a question can be read two ways, it shows both numbers. Each answer comes with one line of assumptions (definition, dataset, time range, filters).
-- **It keeps working offline.** If the context source can't be reached, it uses the last copy and says how old it is. With no copy at all, it refuses rather than guessing.
-
----
-
-## Creating a context (for data teams)
-
-A context is a folder of Markdown files. The only required file is `bq-ask.md`. Everything else is up to you, as long as `bq-ask.md` points to it.
-
-### `bq-ask.md`: the entry point
+## `bq-ask.md`: the entry point
 
 ```markdown
 ---
@@ -69,7 +24,7 @@ Example questions:
 
 The body is instructions for the agent, so say how to find the right dataset and where the definitions live. The example questions are shown to people after setup.
 
-### Recommended layout
+## Recommended layout
 
 ```
 bq-ask.md                     entry point (above)
@@ -85,7 +40,7 @@ apps/<app>/
   tables/<area>.md            per table: what a row is, keys and joins, useful columns, every enum value
 ```
 
-### What makes a context good
+## What makes a context good
 
 - **Define every metric people ask about.** Give its formula, its time column and its caveats. If "active user" isn't written down, the agent will say it doesn't know rather than guess. That's deliberate, but it means you need to write the definitions.
 - **Write down every filter that's always needed** (deleted rows, test data, internal accounts). This is where most wrong numbers come from.
@@ -95,7 +50,7 @@ apps/<app>/
 - **Leave out personal data and secrets.** The context describes data; it never contains it.
 - **Generate the tables, write the meaning by hand.** `tables/*.md` can be regenerated from your code and schemas by an agent. Business definitions, filters and gotchas should be written and reviewed by people.
 
-### Publishing
+## Publishing
 
 **Cloud Storage:** keep the context in git, and mirror it to the bucket when it changes:
 
@@ -110,6 +65,6 @@ Give users `roles/storage.objectViewer` on the bucket, or on a managed folder fo
 
 Use a bucket when your users have Google accounts but not access to your git host: one `gcloud auth login` then covers both the context and BigQuery.
 
-### BigQuery access
+## BigQuery access
 
 Users need BigQuery Job User (`roles/bigquery.jobUser`) on `billing_project`, and BigQuery Data Viewer (`roles/bigquery.dataViewer`) on the datasets the context points to. Grant them to a Google group. For a hard spending limit, set a *query usage per day per user* quota on the billing project.
